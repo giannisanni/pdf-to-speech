@@ -4,11 +4,11 @@ import pdfplumber
 import docx
 import ebooklib
 from ebooklib import epub
+import time  # Import the time module
 
 st.title("Gianni's AudioBook App")
 st.info('Convert pdf to audiobook')
 book = st.file_uploader('Please upload your file', type=['pdf', 'txt', 'docx', 'epub'])
-
 
 def extract_text_from_docx(file):
     doc = docx.Document(file)
@@ -16,7 +16,6 @@ def extract_text_from_docx(file):
     for para in doc.paragraphs:
         full_text.append(para.text)
     return '\n'.join(full_text)
-
 
 def extract_text_from_epub(file):
     book = epub.read_epub(file)
@@ -26,7 +25,6 @@ def extract_text_from_epub(file):
             chapters.append(item.get_content())
     return '\n'.join(chapters)
 
-#all_text = ""  # Initialize all_text here
 if book:
     if book.type == 'application/pdf':
         all_text = ""
@@ -42,11 +40,14 @@ if book:
     elif book.type == 'application/epub+zip':
         all_text = extract_text_from_epub(book)
 
+    # Add a delay to avoid making too many requests to the TTS API
+    time.sleep(2)  # You can adjust the delay time as needed
 
-tts = gTTS(all_text)
-tts.save('audiobook.mp3')
-audio_file = open('audiobook.mp3', 'rb')
-audio_bytes = audio_file.read()
-st.audio(audio_bytes, format='audio/wav', start_time=0)
+    tts = gTTS(all_text)
+    tts.save('audiobook.mp3')
+    audio_file = open('audiobook.mp3', 'rb')
+    audio_bytes = audio_file.read()
+    st.audio(audio_bytes, format='audio/mpeg', start_time=0)  # Use 'audio/mpeg' format
+
 
 
